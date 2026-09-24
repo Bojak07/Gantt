@@ -1,0 +1,121 @@
+:root {
+  /* Core Dark Theme (Default Executive Slate) */
+  --bg-primary: #0b0f19;
+  --bg-secondary: #111827;
+  --bg-tertiary: #1e293b;
+  --bg-surface: #151d30;
+  --bg-surface-hover: #1c2640;
+  --bg-card: rgba(21, 29, 48, 0.75);
+  --bg-overlay: rgba(11, 15, 25, 0.85);
+
+  --border-color: #1e293b;
+  --border-color-light: #334155;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+
+  /* Typography */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-inverse: #0b0f19;
+
+  /* Brand Accents */
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --primary-light: rgba(59, 130, 246, 0.15);
+  --primary-glow: rgba(59, 130, 246, 0.35);
+
+  /* Banner */
+  --banner-bg: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+  --banner-border: #334155;
+
+  /* Status Colors */
+  --status-on-track: #10b981;
+  --status-on-track-bg: rgba(16, 185, 129, 0.15);
+  --status-at-risk: #f59e0b;
+  --status-at-risk-bg: rgba(245, 158, 11, 0.15);
+  --status-delayed: #ef4444;
+  --status-delayed-bg: rgba(239, 68, 68, 0.15);
+  --status-completed: #818cf8;
+  --status-completed-bg: rgba(99, 102, 241, 0.15);
+  --status-not-started: #94a3b8;
+  --status-not-started-bg: rgba(148, 163, 184, 0.15);
+
+  /* Utilization Colors */
+  --util-overbooked: #f43f5e;
+  --util-overbooked-bg: rgba(244, 63, 94, 0.18);
+  --util-optimal: #10b981;
+  --util-optimal-bg: rgba(16, 185, 129, 0.18);
+  --util-underbooked: #38bdf8;
+  --util-underbooked-bg: rgba(56, 189, 248, 0.15);
+
+  /* Resource Hierarchy Levels */
+  --color-domain: #a78bfa;
+  --color-domain-bg: rgba(139, 92, 246, 0.18);
+  --color-tribe: #22d3ee;
+  --color-tribe-bg: rgba(6, 182, 212, 0.18);
+  --color-team: #60a5fa;
+  --color-team-bg: rgba(59, 130, 246, 0.18);
+  --color-person: #f472b6;
+  --color-person-bg: rgba(236, 72, 153, 0.18);
+
+  /* Planning Hierarchy Levels */
+  --color-project: #3b82f6;
+  --color-phase: #8b5cf6;
+  --color-workitem: #0ea5e9;
+  --color-milestone: #f59e0b;
+
+  /* Dimensions & Spacing */
+  --header-height: 64px;
+  --row-height: 46px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 9999px;
+
+  /* Typography */
+  --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.35), 0 2px 4px -1px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.25);
+}
+
+[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f5f9;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f1f5f9;
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-overlay: rgba(15, 23, 42, 0.6);
+
+  --border-color: #e2e8f0;
+  --border-color-light: #cbd5e1;
+  --border-subtle: rgba(0, 0, 0, 0.06);
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-inverse: #ffffff;
+
+  --banner-bg: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+  --banner-border: #cbd5e1;
+
+  --status-on-track: #059669;
+  --status-on-track-bg: rgba(16, 185, 129, 0.12);
+  --status-at-risk: #d97706;
+  --status-at-risk-bg: rgba(245, 158, 11, 0.12);
+  --status-delayed: #dc2626;
+  --status-delayed-bg: rgba(239, 68, 68, 0.12);
+  --status-completed: #4f46e5;
+  --status-completed-bg: rgba(79, 70, 229, 0.12);
+  --status-not-started: #64748b;
+  --status-not-started-bg: rgba(100, 116, 139, 0.12);
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.12);
+}

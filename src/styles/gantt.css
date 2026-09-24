@@ -1,0 +1,593 @@
+/* Gantt View Layout & Responsive Styling */
+
+.gantt-view-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+}
+
+/* Gantt Toolbar */
+.gantt-toolbar {
+  min-height: 52px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.toolbar-left, .toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.search-input-wrapper {
+  position: relative;
+  width: 200px;
+}
+
+.search-input-wrapper i {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 6px 12px 6px 30px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 12px;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: var(--primary);
+}
+
+/* Zoom segmented pill switcher */
+.zoom-switcher {
+  display: flex;
+  align-items: center;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 2px;
+}
+
+.zoom-btn {
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.zoom-btn:hover {
+  color: var(--text-primary);
+}
+
+.zoom-btn.active {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Timeline Window Navigator (for 1M / 3M / 6M) */
+.timeline-nav-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 2px 8px;
+}
+
+.timeline-nav-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timeline-nav-btn:hover {
+  color: var(--text-primary);
+}
+
+.timeline-nav-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+/* Split View Container */
+.gantt-split-pane {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+/* Left Tree Panel - Responsive Width */
+.gantt-tree-panel {
+  width: 440px;
+  min-width: 280px;
+  max-width: 520px;
+  height: 100%;
+  border-right: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  z-index: 10;
+  transition: width 0.1s ease;
+}
+
+.tree-header-row {
+  height: 48px;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.tree-header-col-name { flex: 1; min-width: 120px; }
+.tree-header-col-state { width: 80px; text-align: center; }
+.tree-header-col-dates { width: 85px; text-align: right; }
+.tree-header-col-progress { width: 45px; text-align: right; }
+.tree-header-col-assignee { width: 40px; text-align: center; }
+
+.tree-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.tree-row {
+  height: var(--row-height);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s;
+}
+
+.tree-row:hover {
+  background-color: var(--bg-surface-hover);
+}
+
+.tree-row.selected {
+  background-color: rgba(59, 130, 246, 0.12);
+  border-left: 3px solid var(--primary);
+}
+
+.tree-row-project {
+  font-weight: 700;
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.tree-row-phase {
+  font-weight: 600;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.tree-row-item {
+  color: var(--text-secondary);
+}
+
+.tree-indent {
+  display: inline-flex;
+  align-items: center;
+}
+
+.tree-expander {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  margin-right: 2px;
+}
+
+.tree-expander:hover {
+  color: var(--text-primary);
+}
+
+.tree-name-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 6px;
+  font-size: 12px;
+}
+
+.tree-icon-project { color: var(--color-project); font-size: 13px; }
+.tree-icon-phase { color: var(--color-phase); font-size: 12px; }
+.tree-icon-item { color: var(--color-workitem); font-size: 11px; }
+.tree-icon-milestone { color: var(--color-milestone); font-size: 11px; }
+
+.tree-meta-state {
+  width: 80px;
+  display: flex;
+  justify-content: center;
+}
+
+.tree-meta-dates {
+  width: 85px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tree-meta-progress {
+  width: 45px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: right;
+  color: var(--text-primary);
+}
+
+.tree-meta-assignee {
+  width: 40px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Right Timeline Canvas Panel - 100% Fit-to-View Without Horizontal Scroll */
+.gantt-timeline-panel {
+  flex: 1;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden; /* FIT TO VIEW: No horizontal scroll */
+  position: relative;
+  background-color: var(--bg-primary);
+  width: 100%;
+}
+
+.timeline-inner-container {
+  position: relative;
+  min-height: 100%;
+  width: 100%; /* Spans 100% of available viewport width */
+}
+
+/* Timeline Header */
+.timeline-header {
+  position: sticky;
+  top: 0;
+  height: 48px;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  z-index: 20;
+  width: 100%;
+}
+
+.timeline-header-top {
+  height: 24px;
+  display: flex;
+  border-bottom: 1px solid var(--border-subtle);
+  width: 100%;
+}
+
+.timeline-header-top-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+  border-right: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.02);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timeline-header-bottom {
+  height: 24px;
+  display: flex;
+  width: 100%;
+}
+
+.timeline-header-bottom-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-right: 1px solid var(--border-subtle);
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Timeline Grid Lines & Today Marker */
+.timeline-grid-lines {
+  position: absolute;
+  inset: 48px 0 0 0;
+  display: flex;
+  pointer-events: none;
+  width: 100%;
+}
+
+.grid-column-cell {
+  height: 100%;
+  border-right: 1px dashed var(--border-subtle);
+}
+
+.today-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #ef4444;
+  z-index: 15;
+  pointer-events: none;
+}
+
+.today-marker::before {
+  content: 'TODAY';
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ef4444;
+  color: #fff;
+  font-size: 8px;
+  font-weight: 800;
+  padding: 1px 3px;
+  border-radius: 2px;
+  letter-spacing: 0.5px;
+}
+
+/* Timeline Rows */
+.timeline-rows-container {
+  position: relative;
+  width: 100%;
+}
+
+.timeline-row {
+  height: var(--row-height);
+  border-bottom: 1px solid var(--border-subtle);
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* Gantt Task Bars with State Gradients */
+.gantt-bar-item {
+  position: absolute;
+  height: 22px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  overflow: hidden;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+}
+
+.gantt-bar-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.35);
+}
+
+.gantt-bar-on-track {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  border: 1px solid rgba(16, 185, 129, 0.6);
+}
+
+.gantt-bar-at-risk {
+  background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+  border: 1px solid rgba(245, 158, 11, 0.6);
+}
+
+.gantt-bar-delayed {
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  border: 1px solid rgba(239, 68, 68, 0.6);
+}
+
+.gantt-bar-completed {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  border: 1px solid rgba(99, 102, 241, 0.6);
+}
+
+.gantt-bar-not-started {
+  background: linear-gradient(135deg, #475569 0%, #64748b 100%);
+  border: 1px solid rgba(100, 116, 139, 0.6);
+}
+
+.gantt-bar-progress {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.gantt-bar-label {
+  position: absolute;
+  left: 6px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  pointer-events: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+/* Phase & Project Summary Brackets with State Styling */
+.gantt-bracket-project {
+  position: absolute;
+  height: 10px;
+  border-radius: 3px;
+  z-index: 6;
+  background: #3b82f6;
+}
+
+.gantt-bracket-project::before, .gantt-bracket-project::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid #3b82f6;
+}
+.gantt-bracket-project::before { left: 0; }
+.gantt-bracket-project::after { right: 0; }
+
+.gantt-bracket-phase {
+  position: absolute;
+  height: 8px;
+  border-radius: 2px;
+  z-index: 6;
+  background: #8b5cf6;
+}
+
+.gantt-bracket-phase::before, .gantt-bracket-phase::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  width: 0;
+  height: 0;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+  border-top: 4px solid #8b5cf6;
+}
+.gantt-bracket-phase::before { left: 0; }
+.gantt-bracket-phase::after { right: 0; }
+
+/* Milestone Diamond */
+.gantt-milestone-diamond {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #fff;
+  transform: rotate(45deg);
+  border-radius: 3px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  z-index: 8;
+  transition: transform 0.2s;
+}
+
+.gantt-milestone-diamond:hover {
+  transform: rotate(45deg) scale(1.25);
+}
+
+.milestone-on-track { background: linear-gradient(135deg, #059669 0%, #10b981 100%); }
+.milestone-at-risk { background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%); }
+.milestone-delayed { background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); }
+.milestone-completed { background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); }
+.milestone-not-started { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+
+/* SVG Dependencies Overlay */
+.gantt-svg-overlay {
+  position: absolute;
+  top: 48px;
+  left: 0;
+  width: 100%;
+  height: calc(100% - 48px);
+  pointer-events: none;
+  z-index: 4;
+}
+
+.dependency-line {
+  fill: none;
+  stroke: #64748b;
+  stroke-width: 1.5px;
+  stroke-dasharray: 4 2;
+  transition: stroke 0.2s, stroke-width 0.2s;
+}
+
+.dependency-line:hover, .dependency-line.highlighted {
+  stroke: #38bdf8;
+  stroke-width: 2.5px;
+  stroke-dasharray: none;
+}
+
+/* Media Queries for Tablet & Narrow Screens */
+@media (max-width: 1024px) {
+  .gantt-tree-panel {
+    width: 320px;
+    min-width: 240px;
+  }
+  .tree-header-col-dates,
+  .tree-meta-dates {
+    display: none;
+  }
+  .tree-header-col-state,
+  .tree-meta-state {
+    width: 65px;
+  }
+}
+
+@media (max-width: 768px) {
+  .gantt-split-pane {
+    flex-direction: column;
+  }
+  .gantt-tree-panel {
+    width: 100%;
+    max-width: 100%;
+    height: 40%;
+    border-right: none;
+    border-bottom: 2px solid var(--border-color);
+  }
+  .gantt-timeline-panel {
+    height: 60%;
+  }
+}
