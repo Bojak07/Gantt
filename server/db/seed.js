@@ -103,21 +103,21 @@ export function seedDatabase(db = getDatabase()) {
   `);
 
   const peopleData = [
-    ['pers-1', 'team-1-1-1', 'Marcus Vance', 'marcus.vance@bank.com', 'VP Product & Channels', 'MV', 160],
-    ['pers-2', 'team-1-1-1', 'Liam Chen', 'liam.chen@bank.com', 'Principal UI/UX Designer', 'LC', 160],
-    ['pers-3', 'team-1-1-1', 'Elena Rostova', 'elena.rostova@bank.com', 'Chief Architect', 'ER', 160],
-    ['pers-4', 'team-1-1-1', 'Sara Connor', 'sara.connor@bank.com', 'Senior Mobile Engineer', 'SC', 160],
-    ['pers-5', 'team-1-1-2', 'Maya Lin', 'maya.lin@bank.com', 'Lead Frontend Engineer', 'ML', 160],
-    ['pers-6', 'team-1-1-2', 'Alex Mercer', 'alex.mercer@bank.com', 'Fullstack React Engineer', 'AM', 160],
-    ['pers-7', 'team-1-2-1', 'Kavita Rao', 'kavita.rao@bank.com', 'API Platform Lead', 'KR', 160],
-    ['pers-8', 'team-1-2-1', 'Thomas Burke', 'thomas.burke@bank.com', 'Integration Specialist', 'TB', 160],
-    ['pers-9', 'team-2-1-1', 'Sophia Lin', 'sophia.lin@bank.com', 'DevOps & Cloud Architect', 'SL', 160],
-    ['pers-10', 'team-2-1-1', 'Jordan Hayes', 'jordan.hayes@bank.com', 'Kubernetes SRE', 'JH', 160],
-    ['pers-11', 'team-2-2-1', 'David Sterling', 'david.sterling@bank.com', 'Payments Solutions Lead', 'DS', 160],
-    ['pers-12', 'team-2-2-1', 'Chloe Bennett', 'chloe.bennett@bank.com', 'ISO 20022 Specialist', 'CB', 160],
-    ['pers-13', 'team-3-1-1', 'Vikram Patel', 'vikram.patel@bank.com', 'Head of Cyber Defense', 'VP', 160],
-    ['pers-14', 'team-3-1-1', 'Dr. Aris Thorne', 'aris.thorne@bank.com', 'Security Research Director', 'AT', 160],
-    ['pers-15', 'team-3-2-1', 'Rachel Green', 'rachel.green@bank.com', 'Head of Compliance', 'RG', 160],
+    ['pers-1', 'team-1-1-1', 'Marcus Vance', 'marcus.vance@bank.com', 'VP Product & Channels', 'MV', 40],
+    ['pers-2', 'team-1-1-1', 'Liam Chen', 'liam.chen@bank.com', 'Principal UI/UX Designer', 'LC', 40],
+    ['pers-3', 'team-1-1-1', 'Elena Rostova', 'elena.rostova@bank.com', 'Chief Architect', 'ER', 40],
+    ['pers-4', 'team-1-1-1', 'Sara Connor', 'sara.connor@bank.com', 'Senior Mobile Engineer', 'SC', 40],
+    ['pers-5', 'team-1-1-2', 'Maya Lin', 'maya.lin@bank.com', 'Lead Frontend Engineer', 'ML', 40],
+    ['pers-6', 'team-1-1-2', 'Alex Mercer', 'alex.mercer@bank.com', 'Fullstack React Engineer', 'AM', 40],
+    ['pers-7', 'team-1-2-1', 'Kavita Rao', 'kavita.rao@bank.com', 'API Platform Lead', 'KR', 40],
+    ['pers-8', 'team-1-2-1', 'Thomas Burke', 'thomas.burke@bank.com', 'Integration Specialist', 'TB', 40],
+    ['pers-9', 'team-2-1-1', 'Sophia Lin', 'sophia.lin@bank.com', 'DevOps & Cloud Architect', 'SL', 40],
+    ['pers-10', 'team-2-1-1', 'Jordan Hayes', 'jordan.hayes@bank.com', 'Kubernetes SRE', 'JH', 40],
+    ['pers-11', 'team-2-2-1', 'David Sterling', 'david.sterling@bank.com', 'Payments Solutions Lead', 'DS', 40],
+    ['pers-12', 'team-2-2-1', 'Chloe Bennett', 'chloe.bennett@bank.com', 'ISO 20022 Specialist', 'CB', 40],
+    ['pers-13', 'team-3-1-1', 'Vikram Patel', 'vikram.patel@bank.com', 'Head of Cyber Defense', 'VP', 40],
+    ['pers-14', 'team-3-1-1', 'Dr. Aris Thorne', 'aris.thorne@bank.com', 'Security Research Director', 'AT', 40],
+    ['pers-15', 'team-3-2-1', 'Rachel Green', 'rachel.green@bank.com', 'Head of Compliance', 'RG', 40],
     ['pers-16', 'team-3-2-1', 'Tariq Mansoor', 'tariq.mansoor@bank.com', 'Machine Learning Engineer', 'TM', 160]
   ];
   peopleData.forEach((row) => insertPerson.run(...row));
@@ -313,22 +313,6 @@ export function seedDatabase(db = getDatabase()) {
   peopleData.forEach(([pId]) => {
     insertCapacity.run(`cap-${pId}-${ym(8)}`,  pId, ym(8),  140, 'Summer bank holiday & PTO allowance');
     insertCapacity.run(`cap-${pId}-${ym(12)}`, pId, ym(12), 120, 'Year-end holiday shutdown');
-  });
-
-  peopleData.forEach(([pId]) => {
-    months.forEach((ym) => {
-      const monthNum = parseInt(ym.split('-')[1], 10);
-      let cap = 160;
-      let notes = 'Standard monthly allocation';
-      if (monthNum === 8) {
-        cap = 140;
-        notes = 'Summer bank holiday & PTO allowance';
-      } else if (monthNum === 12) {
-        cap = 120;
-        notes = 'Year-end holiday shutdown';
-      }
-      insertCapacity.run(`cap-${pId}-${ym}`, pId, ym, cap, notes);
-    });
   });
 
   // 11. Decision Log — seed with sample strategic decisions

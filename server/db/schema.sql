@@ -112,7 +112,7 @@ CREATE TABLE IF NOT EXISTS dependencies (
 CREATE TABLE IF NOT EXISTS capacity_records (
   id TEXT PRIMARY KEY,
   person_id TEXT NOT NULL,
-  year_month TEXT NOT NULL, -- e.g. '2025-03'
+  year_month TEXT NOT NULL, -- e.g. 'YYYY-MM'
   capacity_hours REAL NOT NULL,
   notes TEXT,
   created_at TEXT DEFAULT (datetime('now')),

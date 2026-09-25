@@ -8,6 +8,7 @@ export function AppProvider({ children }) {
   const [projectsData, setProjectsData] = useState({ projects: [], flatPhases: [], flatWorkItems: [], dependencies: [] });
   const [hierarchyData, setHierarchyData] = useState({ tree: [], domains: [], tribes: [], teams: [], people: [] });
   const [capacityData, setCapacityData] = useState(null);
+  const [decisions, setDecisions] = useState([]);
   const [auditHistory, setAuditHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -25,17 +26,19 @@ export function AppProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const [projRes, hierRes, capRes, histRes] = await Promise.all([
+      const [projRes, hierRes, capRes, histRes, decRes] = await Promise.all([
         api.getProjects(),
         api.getHierarchy(),
         api.getCapacityMatrix(),
-        api.getHistory()
+        api.getHistory(),
+        api.getDecisions()
       ]);
 
       setProjectsData(projRes);
       setHierarchyData(hierRes);
       setCapacityData(capRes);
       setAuditHistory(histRes);
+      setDecisions(decRes);
     } catch (err) {
       console.error('Failed to load application data:', err);
       setError(err.message);
@@ -69,6 +72,7 @@ export function AppProvider({ children }) {
         projectsData,
         hierarchyData,
         capacityData,
+        decisions,
         auditHistory,
         loading,
         error,

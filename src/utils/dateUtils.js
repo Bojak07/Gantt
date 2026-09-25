@@ -1,22 +1,38 @@
 /**
  * Timeline date mathematics, viewport windowing, and fit-to-view coordinate calculations.
+ * All timeline math anchors to the current year by default (new Date().getFullYear())
+ * and every function accepts an explicit `year` for year-by-year navigation.
  */
 
-export const YEAR = 2025;
+export const CURRENT_YEAR = new Date().getFullYear();
+
 export const MONTH_NAMES = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
 ];
 
-export const QUARTERS = [
-  { name: 'Q1 2025', months: ['Jan', 'Feb', 'Mar'], startMonth: 0, endMonth: 2 },
-  { name: 'Q2 2025', months: ['Apr', 'May', 'Jun'], startMonth: 3, endMonth: 5 },
-  { name: 'Q3 2025', months: ['Jul', 'Aug', 'Sep'], startMonth: 6, endMonth: 8 },
-  { name: 'Q4 2025', months: ['Oct', 'Nov', 'Dec'], startMonth: 9, endMonth: 11 }
-];
+/**
+ * Builds quarter descriptors for a given year.
+ */
+export function getQuarters(year) {
+  return [
+    { name: `Q1 ${year}`, months: ['Jan', 'Feb', 'Mar'], startMonth: 0, endMonth: 2 },
+    { name: `Q2 ${year}`, months: ['Apr', 'May', 'Jun'], startMonth: 3, endMonth: 5 },
+    { name: `Q3 ${year}`, months: ['Jul', 'Aug', 'Sep'], startMonth: 6, endMonth: 8 },
+    { name: `Q4 ${year}`, months: ['Oct', 'Nov', 'Dec'], startMonth: 9, endMonth: 11 }
+  ];
+}
 
-export const YEAR_START_DATE = new Date(Date.UTC(YEAR, 0, 1));
-export const TOTAL_YEAR_DAYS = 365;
+export const QUARTERS = getQuarters(CURRENT_YEAR);
+
+/**
+ * Returns the UTC start (Jan 1 00:00:00) of a calendar year.
+ */
+export function getYearStartUTC(year = CURRENT_YEAR) {
+  return new Date(Date.UTC(year, 0, 1));
+}
+
+export const YEAR_START_DATE = getYearStartUTC();
 
 /**
  * Parses YYYY-MM-DD to UTC Date object.
@@ -36,24 +52,34 @@ export function getDaysBetweenUTC(startDate, endDate) {
 }
 
 /**
- * Returns date window and header ticks for a given zoom level and offset index.
+ * Total days in a calendar year (leap-year safe: 365 or 366).
  */
-export function getTimelineViewport(zoomLevel = 'YEAR', offsetIndex = 0) {
+export function getTotalYearDays(year = CURRENT_YEAR) {
+  return getDaysBetweenUTC(getYearStartUTC(year), new Date(Date.UTC(year, 11, 31)));
+}
+
+export const TOTAL_YEAR_DAYS = getTotalYearDays();
+
+/**
+ * Returns date window and header ticks for a given zoom level, offset index, and year.
+ */
+export function getTimelineViewport(zoomLevel = 'YEAR', offsetIndex = 0, year = CURRENT_YEAR) {
   let startDate, endDate, topHeader = [], bottomHeader = [], label = '';
+  const quarters = getQuarters(year);
 
   switch (zoomLevel) {
     case '1M': {
       // 1 Month view (offsetIndex 0..11)
       const mIdx = Math.max(0, Math.min(11, offsetIndex));
-      startDate = new Date(Date.UTC(YEAR, mIdx, 1));
-      endDate = new Date(Date.UTC(YEAR, mIdx + 1, 0, 23, 59, 59));
+      startDate = new Date(Date.UTC(year, mIdx, 1));
+      endDate = new Date(Date.UTC(year, mIdx + 1, 0, 23, 59, 59));
       const totalDays = endDate.getUTCDate();
-      label = `${MONTH_NAMES[mIdx]} 2025`;
+      label = `${MONTH_NAMES[mIdx]} ${year}`;
 
-      topHeader = [{ name: `${MONTH_NAMES[mIdx]} 2025`, flex: 1 }];
+      topHeader = [{ name: `${MONTH_NAMES[mIdx]} ${year}`, flex: 1 }];
       bottomHeader = [];
       for (let d = 1; d <= totalDays; d++) {
-        const dateObj = new Date(Date.UTC(YEAR, mIdx, d));
+        const dateObj = new Date(Date.UTC(year, mIdx, d));
         const dayOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'][dateObj.getUTCDay()];
         bottomHeader.push({
           name: `${d}`,
@@ -67,12 +93,12 @@ export function getTimelineViewport(zoomLevel = 'YEAR', offsetIndex = 0) {
     case '3M': {
       // 3 Months / Quarter view (offsetIndex 0..3)
       const qIdx = Math.max(0, Math.min(3, offsetIndex));
-      const q = QUARTERS[qIdx];
-      startDate = new Date(Date.UTC(YEAR, q.startMonth, 1));
-      endDate = new Date(Date.UTC(YEAR, q.endMonth + 1, 0, 23, 59, 59));
+      const q = quarters[qIdx];
+      startDate = new Date(Date.UTC(year, q.startMonth, 1));
+      endDate = new Date(Date.UTC(year, q.endMonth + 1, 0, 23, 59, 59));
       label = q.name;
 
-      topHeader = q.months.map((m) => ({ name: `${m} 2025`, flex: 1 }));
+      topHeader = q.months.map((m) => ({ name: `${m} ${year}`, flex: 1 }));
       bottomHeader = [];
       for (let w = 1; w <= 13; w++) {
         bottomHeader.push({ name: `W${w}`, flex: 1 });
@@ -85,12 +111,11 @@ export function getTimelineViewport(zoomLevel = 'YEAR', offsetIndex = 0) {
       const hIdx = Math.max(0, Math.min(1, offsetIndex));
       const startM = hIdx * 6;
       const endM = startM + 5;
-      startDate = new Date(Date.UTC(YEAR, startM, 1));
-      endDate = new Date(Date.UTC(YEAR, endM + 1, 0, 23, 59, 59));
-      label = hIdx === 0 ? 'H1 2025 (Jan – Jun)' : 'H2 2025 (Jul – Dec)';
+      startDate = new Date(Date.UTC(year, startM, 1));
+      endDate = new Date(Date.UTC(year, endM + 1, 0, 23, 59, 59));
+      label = hIdx === 0 ? `H1 ${year} (Jan – Jun)` : `H2 ${year} (Jul – Dec)`;
 
-      const quarters = hIdx === 0 ? [QUARTERS[0], QUARTERS[1]] : [QUARTERS[2], QUARTERS[3]];
-      topHeader = quarters.map((q) => ({ name: q.name, flex: 1 }));
+      topHeader = (hIdx === 0 ? [quarters[0], quarters[1]] : [quarters[2], quarters[3]]).map((q) => ({ name: q.name, flex: 1 }));
       bottomHeader = MONTH_NAMES.slice(startM, endM + 1).map((m) => ({ name: m, flex: 1 }));
       break;
     }
@@ -98,11 +123,11 @@ export function getTimelineViewport(zoomLevel = 'YEAR', offsetIndex = 0) {
     case '12M':
     case 'YEAR':
     default: {
-      startDate = new Date(Date.UTC(YEAR, 0, 1));
-      endDate = new Date(Date.UTC(YEAR, 11, 31, 23, 59, 59));
-      label = 'Full Year 2025';
+      startDate = getYearStartUTC(year);
+      endDate = new Date(Date.UTC(year, 11, 31, 23, 59, 59));
+      label = `Full Year ${year}`;
 
-      topHeader = QUARTERS.map((q) => ({ name: q.name, flex: 1 }));
+      topHeader = quarters.map((q) => ({ name: q.name, flex: 1 }));
       bottomHeader = MONTH_NAMES.map((m) => ({ name: m, flex: 1 }));
       break;
     }
@@ -156,10 +181,10 @@ export function calculateFitCoordinates(startStr, endStr, viewportStartDate, tot
 }
 
 /**
- * Calculates bar coordinates spanning the full calendar year 2025.
+ * Calculates bar coordinates spanning the full calendar year (current year by default).
  */
-export function calculateBarCoordinates(startStr, endStr) {
-  return calculateFitCoordinates(startStr, endStr, YEAR_START_DATE, TOTAL_YEAR_DAYS);
+export function calculateBarCoordinates(startStr, endStr, year = CURRENT_YEAR) {
+  return calculateFitCoordinates(startStr, endStr, getYearStartUTC(year), getTotalYearDays(year));
 }
 
 /**

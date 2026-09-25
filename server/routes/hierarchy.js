@@ -213,15 +213,12 @@ router.post('/people', (req, res) => {
     const db = getDatabase();
     const id = `pers-${Date.now()}`;
     db.prepare('INSERT INTO people (id, team_id, name, email, role, avatar_initials, default_weekly_hours) VALUES (?, ?, ?, ?, ?, ?, ?)').run(
-      id, team_id || null, name, email, role, initials, default_weekly_hours || 160
+      id, team_id || null, name, email, role, initials, default_weekly_hours || 40
     );
 
-    // Auto seed capacity records for current year
-    const months = ['01','02','03','04','05','06','07','08','09','10','11','12'];
-    const insertCap = db.prepare('INSERT OR IGNORE INTO capacity_records (id, person_id, year_month, capacity_hours, notes) VALUES (?, ?, ?, ?, ?)');
-    months.forEach((m) => {
-      insertCap.run(`cap-${id}-2025-${m}`, id, `2025-${m}`, default_weekly_hours || 160, 'Standard allocation');
-    });
+    // No flat capacity records: the capacity matrix computes day-based
+    // monthly capacity dynamically from default_weekly_hours. Explicit
+    // records are only created when a user overrides a specific month.
 
     logChange(db, 'PERSON', id, 'CREATE', `Added person: ${name} (${role})`);
     const created = db.prepare('SELECT * FROM people WHERE id = ?').get(id);

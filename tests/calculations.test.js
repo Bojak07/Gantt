@@ -1,12 +1,46 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  getWorkingDaysInMonth,
+  getDynamicMonthlyCapacity,
   getInclusiveDays,
   getMonthlyOverlapDays,
   calculateMonthlyDemandForAssignment,
   calculateRollups,
   hasCircularDependency
 } from '../server/services/calculations.js';
+
+test('Day-based capacity: getWorkingDaysInMonth counts Monday-Friday only', () => {
+  // Jan 2025: starts Wednesday, 31 days -> 3 (Wed-Fri) + 4x5 = 23
+  assert.equal(getWorkingDaysInMonth(2025, 1), 23);
+
+  // Feb 2026: starts Sunday, 28 days -> 4 full Mon-Fri weeks = 20
+  assert.equal(getWorkingDaysInMonth(2026, 2), 20);
+
+  // Feb 2024: leap month, starts Thursday -> 2 (Thu-Fri) + 3x5 + 4 (Mon-Thu) = 21
+  assert.equal(getWorkingDaysInMonth(2024, 2), 21);
+
+  // Dec 2023: starts Friday, 31 days -> 1 (Fri) + 4x5 = 21
+  assert.equal(getWorkingDaysInMonth(2023, 12), 21);
+
+  // Apr 2025: starts Tuesday, 30 days -> 4 (Tue-Fri) + 3x5 + 3 (Mon-Wed) = 22
+  assert.equal(getWorkingDaysInMonth(2025, 4), 22);
+
+  // May 2026: starts Friday, 31 days -> 1 (Fri) + 4x5 = 21
+  assert.equal(getWorkingDaysInMonth(2026, 5), 21);
+});
+
+test('Day-based capacity: getDynamicMonthlyCapacity prorates (weeklyHours / 5) * workingDays', () => {
+  // Default 40h/week -> 8h per working day
+  assert.equal(getDynamicMonthlyCapacity(2025, 1), 184); // 23 working days
+  assert.equal(getDynamicMonthlyCapacity(2026, 2), 160); // 20 working days
+  assert.equal(getDynamicMonthlyCapacity(2024, 2), 168); // 21 working days (leap Feb)
+  assert.equal(getDynamicMonthlyCapacity(2023, 12), 168); // 21 working days
+
+  // Custom weekly hours
+  assert.equal(getDynamicMonthlyCapacity(2025, 4, 45), 198); // 9h/day * 22
+  assert.equal(getDynamicMonthlyCapacity(2026, 5, 35), 147); // 7h/day * 21
+});
 
 test('Date Helpers: getInclusiveDays', () => {
   assert.equal(getInclusiveDays('2025-01-01', '2025-01-01'), 1);
@@ -55,6 +89,23 @@ test('Rollups: calculateRollups computes correct min/max dates and average progr
   assert.equal(rolledProj[0].computedStartDate, '2025-02-01');
   assert.equal(rolledProj[0].computedEndDate, '2025-05-30');
   assert.equal(rolledProj[0].computedProgress, 75);
+});
+
+test('Rollups: empty phase and project fall back to their own dates', () => {
+  const projects = [{ id: 'p1', name: 'Empty Proj', start_date: '2026-04-01', end_date: '2026-06-30', progress: 0 }];
+  const phases = [{ id: 'ph1', project_id: 'p1', name: 'Empty Phase', start_date: '2026-04-10', end_date: '2026-05-10', progress: 30 }];
+
+  const { projects: rolledProj, phases: rolledPhases } = calculateRollups(projects, phases, []);
+
+  assert.equal(rolledPhases[0].computedStartDate, '2026-04-10');
+  assert.equal(rolledPhases[0].computedEndDate, '2026-05-10');
+  assert.equal(rolledPhases[0].computedProgress, 30);
+  assert.equal(rolledPhases[0].totalItems, 0);
+  assert.equal(rolledPhases[0].completedItems, 0);
+
+  assert.equal(rolledProj[0].computedStartDate, '2026-04-10');
+  assert.equal(rolledProj[0].computedEndDate, '2026-05-10');
+  assert.equal(rolledProj[0].computedProgress, 30);
 });
 
 test('Dependencies: hasCircularDependency prevents cycles', () => {

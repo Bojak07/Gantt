@@ -1,18 +1,30 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext.jsx';
+import { api } from '../../services/api.js';
 import {
   getTimelineViewport,
   calculateFitCoordinates,
-  formatShortDate
+  formatShortDate,
+  CURRENT_YEAR
 } from '../../utils/dateUtils.js';
 import WorkItemModal from './WorkItemModal.jsx';
+import PhaseModal from './PhaseModal.jsx';
+import DependencyModal from './DependencyModal.jsx';
 
 export default function PlanView() {
-  const { projectsData } = useApp();
+  const { projectsData, refreshAll, addToast } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [zoomLevel, setZoomLevel] = useState('YEAR'); // '1M', '3M', '6M', '12M', 'YEAR'
   const [offsetIndex, setOffsetIndex] = useState(0); // For 1M (0..11), 3M (0..3), 6M (0..1)
+  const [year, setYear] = useState(CURRENT_YEAR); // Dynamic year navigation, anchored to current year
+  const [levelFilter, setLevelFilter] = useState('ALL'); // 'ALL', 'PROJECTS', 'PHASES', 'TASKS'
+  const [projectFilter, setProjectFilter] = useState('ALL'); // 'ALL' or a single project id
+  const [containerWidth, setContainerWidth] = useState(0); // Measured timeline panel width (Fit Year + zoom overflow)
+  const [phaseModalOpen, setPhaseModalOpen] = useState(false);
+  const [editingPhase, setEditingPhase] = useState(null);
+  const [defaultProjectId, setDefaultProjectId] = useState(null);
+  const [depModalOpen, setDepModalOpen] = useState(false);
 
   const [expandedProjects, setExpandedProjects] = useState({
     'proj-1': true,
@@ -39,6 +51,17 @@ export default function PlanView() {
 
   const treePanelRef = useRef(null);
   const timelinePanelRef = useRef(null);
+
+  // Measure the timeline panel so Fit Year matches the viewport exactly and zoomed modes can overflow
+  useEffect(() => {
+    const el = timelinePanelRef.current;
+    if (!el) return;
+    const update = () => setContainerWidth(el.clientWidth);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   // Synchronized vertical scroll
   const handleTreeScroll = (e) => {
@@ -79,10 +102,43 @@ export default function PlanView() {
     setExpandedPhases({});
   };
 
-  // Switch zoom level & reset/clamp offset index
+  // Map a (level, offset) window to the corresponding window at another zoom level
+  const offsetForZoom = (fromLevel, fromOffset, toLevel) => {
+    const startMonth = { '1M': fromOffset, '3M': fromOffset * 3, '6M': fromOffset * 6, '12M': 0, 'YEAR': 0 }[fromLevel] ?? 0;
+    const step = { '1M': 1, '3M': 3, '6M': 6, '12M': 12, 'YEAR': 12 }[toLevel] ?? 12;
+    const maxIdx = toLevel === '1M' ? 11 : toLevel === '3M' ? 3 : toLevel === '6M' ? 1 : 0;
+    return Math.max(0, Math.min(maxIdx, Math.floor(startMonth / step)));
+  };
+
+  // Mouse wheel zoom: step through zoom levels while preserving the visible date context
+  const zoomLevelRef = useRef(zoomLevel);
+  const offsetIndexRef = useRef(offsetIndex);
+  useEffect(() => {
+    zoomLevelRef.current = zoomLevel;
+    offsetIndexRef.current = offsetIndex;
+  }, [zoomLevel, offsetIndex]);
+
+  useEffect(() => {
+    const el = timelinePanelRef.current;
+    if (!el) return;
+    const ORDER = ['1M', '3M', '6M', '12M', 'YEAR'];
+    const onWheel = (e) => {
+      e.preventDefault();
+      const idx = ORDER.indexOf(zoomLevelRef.current);
+      const next = e.deltaY > 0 ? Math.min(ORDER.length - 1, idx + 1) : Math.max(0, idx - 1);
+      if (ORDER[next] !== zoomLevelRef.current) {
+        setZoomLevel(ORDER[next]);
+        setOffsetIndex(offsetForZoom(zoomLevelRef.current, offsetIndexRef.current, ORDER[next]));
+      }
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, []);
+
+  // Switch zoom level, preserving the currently visible date context
   const handleZoomChange = (mode) => {
     setZoomLevel(mode);
-    setOffsetIndex(0);
+    setOffsetIndex(offsetForZoom(zoomLevel, offsetIndex, mode));
   };
 
   const handlePrevWindow = () => {
@@ -94,36 +150,53 @@ export default function PlanView() {
     setOffsetIndex((prev) => Math.min(maxIdx, prev + 1));
   };
 
-  // Get current active timeline viewport window (Fit-to-view across 100% width)
+  // Get current active timeline viewport window for the selected year
   const viewport = useMemo(() => {
-    return getTimelineViewport(zoomLevel, offsetIndex);
-  }, [zoomLevel, offsetIndex]);
+    return getTimelineViewport(zoomLevel, offsetIndex, year);
+  }, [zoomLevel, offsetIndex, year]);
 
-  // Flatten visible rows
+  // Timeline content width: Fit Year matches the container exactly;
+  // granular zooms render wider than the container for natural horizontal scrolling.
+  const isGranular = zoomLevel !== 'YEAR';
+  const PX_PER_DAY = { '1M': 48, '3M': 16, '6M': 8, '12M': 4 };
+  const innerWidthPx = isGranular
+    ? Math.max(viewport.totalDays * (PX_PER_DAY[zoomLevel] || 4), containerWidth + 60)
+    : containerWidth;
+
+  // Flatten visible rows (respecting Level and Project filters)
   const visibleRows = useMemo(() => {
     const rows = [];
+    const filteredProjects = projectFilter === 'ALL'
+      ? projectsData.projects
+      : projectsData.projects.filter((p) => p.id === projectFilter);
 
-    projectsData.projects.forEach((project) => {
+    filteredProjects.forEach((project) => {
+      const projExpanded = levelFilter === 'TASKS' ? true : Boolean(expandedProjects[project.id]);
+      const showPhases = levelFilter !== 'PROJECTS';
+      const showItems = levelFilter === 'ALL' || levelFilter === 'TASKS';
+
       rows.push({
         type: 'project',
         id: project.id,
         data: project,
-        isExpanded: Boolean(expandedProjects[project.id]),
+        isExpanded: projExpanded,
         level: 1
       });
 
-      if (expandedProjects[project.id]) {
+      if (projExpanded && showPhases) {
         project.phases.forEach((phase) => {
+          const phaseExpanded = levelFilter === 'TASKS' ? true : Boolean(expandedPhases[phase.id]);
+
           rows.push({
             type: 'phase',
             id: phase.id,
             projectId: project.id,
             data: phase,
-            isExpanded: Boolean(expandedPhases[phase.id]),
+            isExpanded: phaseExpanded,
             level: 2
           });
 
-          if (expandedPhases[phase.id]) {
+          if (phaseExpanded && showItems) {
             phase.workItems.forEach((item) => {
               const itemSearchMatch = !searchQuery || item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.description?.toLowerCase().includes(searchQuery.toLowerCase());
               const itemStatusMatch = statusFilter === 'ALL' || item.status === statusFilter;
@@ -145,7 +218,7 @@ export default function PlanView() {
     });
 
     return rows;
-  }, [projectsData.projects, expandedProjects, expandedPhases, searchQuery, statusFilter]);
+  }, [projectsData.projects, expandedProjects, expandedPhases, searchQuery, statusFilter, levelFilter, projectFilter]);
 
   // Dependency coordinate map for SVG arrows inside current viewport
   const dependencyLines = useMemo(() => {
@@ -169,10 +242,11 @@ export default function PlanView() {
           const predCoords = calculateFitCoordinates(predItem.start_date, predItem.end_date, viewport.startDate, viewport.totalDays);
           const succCoords = calculateFitCoordinates(succItem.start_date, succItem.end_date, viewport.startDate, viewport.totalDays);
 
-          if (predCoords.isVisible || succCoords.isVisible) {
-            const startX = Math.max(0, Math.min(100, predCoords.leftPct + predCoords.widthPct));
+          if ((predCoords.isVisible || succCoords.isVisible) && innerWidthPx > 0) {
+            // Pixel coordinates (SVG path data does not support percentages)
+            const startX = (Math.max(0, Math.min(100, predCoords.leftPct + predCoords.widthPct)) / 100) * innerWidthPx;
             const startY = predRowIdx * ROW_H + ROW_H / 2;
-            const endX = Math.max(0, Math.min(100, succCoords.leftPct));
+            const endX = (Math.max(0, Math.min(100, succCoords.leftPct)) / 100) * innerWidthPx;
             const endY = succRowIdx * ROW_H + ROW_H / 2;
 
             lines.push({
@@ -189,12 +263,17 @@ export default function PlanView() {
     });
 
     return lines;
-  }, [visibleRows, projectsData.dependencies, projectsData.flatWorkItems, viewport]);
+  }, [visibleRows, projectsData.dependencies, projectsData.flatWorkItems, viewport, innerWidthPx]);
 
-  // Today marker coordinates in current viewport
+  // Today marker: always the real current date (only visible when the viewport contains it)
+  const todayStr = useMemo(() => {
+    const n = new Date();
+    return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
+  }, []);
+
   const todayCoords = useMemo(() => {
-    return calculateFitCoordinates('2025-03-23', '2025-03-23', viewport.startDate, viewport.totalDays);
-  }, [viewport]);
+    return calculateFitCoordinates(todayStr, todayStr, viewport.startDate, viewport.totalDays);
+  }, [viewport, todayStr]);
 
   const handleEditItem = (item, e) => {
     e.stopPropagation();
@@ -206,6 +285,30 @@ export default function PlanView() {
     setEditingItem(null);
     setSelectedPhaseId(phaseId);
     setModalOpen(true);
+  };
+
+  const handleEditPhase = (phase, projectId, e) => {
+    e.stopPropagation();
+    setEditingPhase(phase);
+    setDefaultProjectId(projectId);
+    setPhaseModalOpen(true);
+  };
+
+  const handleAddPhase = (projectId = null) => {
+    setEditingPhase(null);
+    setDefaultProjectId(projectId || (projectFilter !== 'ALL' ? projectFilter : projectsData.projects[0]?.id || null));
+    setPhaseModalOpen(true);
+  };
+
+  const handleDeleteItem = async (item) => {
+    if (!window.confirm(`Delete "${item.name}"? This cannot be undone.`)) return;
+    try {
+      await api.deleteWorkItem(item.id);
+      addToast('Work item deleted.', 'success');
+      await refreshAll();
+    } catch (err) {
+      addToast(err.message, 'error');
+    }
   };
 
   const getStatusBadge = (status) => {
@@ -257,6 +360,30 @@ export default function PlanView() {
             <option value="NOT_STARTED">Not Started</option>
           </select>
 
+          <select
+            className="form-select"
+            style={{ width: '130px', padding: '5px 8px', fontSize: '12px' }}
+            value={levelFilter}
+            onChange={(e) => setLevelFilter(e.target.value)}
+          >
+            <option value="ALL">All Levels</option>
+            <option value="PROJECTS">Projects Only</option>
+            <option value="PHASES">Phases Only</option>
+            <option value="TASKS">Tasks Only</option>
+          </select>
+
+          <select
+            className="form-select"
+            style={{ width: '150px', padding: '5px 8px', fontSize: '12px' }}
+            value={projectFilter}
+            onChange={(e) => setProjectFilter(e.target.value)}
+          >
+            <option value="ALL">All Projects</option>
+            {projectsData.projects.map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+
           <button className="btn btn-secondary" style={{ padding: '5px 8px', fontSize: '11px' }} onClick={expandAll} title="Expand All">
             <i className="fa-solid fa-angles-down"></i>
           </button>
@@ -267,6 +394,25 @@ export default function PlanView() {
         </div>
 
         <div className="toolbar-right">
+          {/* Year navigation, anchored to current year */}
+          <div className="timeline-nav-pills">
+            <button
+              type="button"
+              className="timeline-nav-btn"
+              onClick={() => setYear((y) => y - 1)}
+            >
+              <i className="fa-solid fa-chevron-left"></i>
+            </button>
+            <span className="timeline-nav-label">{year}</span>
+            <button
+              type="button"
+              className="timeline-nav-btn"
+              onClick={() => setYear((y) => y + 1)}
+            >
+              <i className="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+
           {/* Window Navigation (for 1M / 3M / 6M) */}
           {isZoomWindowed && (
             <div className="timeline-nav-pills">
@@ -306,9 +452,19 @@ export default function PlanView() {
             ))}
           </div>
 
+          <button className="btn btn-primary" style={{ padding: '5px 10px', fontSize: '12px' }} onClick={() => handleAddPhase()}>
+            <i className="fa-solid fa-layer-group"></i>
+            <span>Phase</span>
+          </button>
+
           <button className="btn btn-primary" style={{ padding: '5px 10px', fontSize: '12px' }} onClick={() => handleAddNew()}>
             <i className="fa-solid fa-plus"></i>
             <span>Task</span>
+          </button>
+
+          <button className="btn btn-secondary" style={{ padding: '5px 10px', fontSize: '12px' }} onClick={() => setDepModalOpen(true)}>
+            <i className="fa-solid fa-arrow-right-long"></i>
+            <span>Dependency</span>
           </button>
         </div>
       </div>
@@ -367,6 +523,7 @@ export default function PlanView() {
                     key={row.id}
                     className={`tree-row tree-row-phase ${isSelected ? 'selected' : ''}`}
                     onClick={() => setSelectedItemId(row.id)}
+                    onDoubleClick={(e) => handleEditPhase(ph, row.projectId, e)}
                   >
                     <div className="tree-indent" style={{ paddingLeft: '14px' }}>
                       <span className="tree-expander" onClick={(e) => { e.stopPropagation(); togglePhase(ph.id); }}>
@@ -418,15 +575,24 @@ export default function PlanView() {
                       {item.avatar || 'UN'}
                     </span>
                   </div>
+                  <span
+                    className="tree-row-action"
+                    title="Delete task"
+                    onClick={(e) => { e.stopPropagation(); handleDeleteItem(item); }}
+                  >
+                    <i className="fa-solid fa-trash-can"></i>
+                  </span>
                 </div>
               );
             })}
           </div>
+
+          {isGranular && <div className="tree-scrollbar-gutter"></div>}
         </div>
 
-        {/* Right Timeline Canvas Panel - 100% Fit-to-View Without Horizontal Scroll */}
+        {/* Right Timeline Canvas Panel - horizontal scrolling when zoomed into granular modes */}
         <div className="gantt-timeline-panel" ref={timelinePanelRef} onScroll={handleTimelineScroll}>
-          <div className="timeline-inner-container">
+          <div className="timeline-inner-container" style={{ width: innerWidthPx ? `${innerWidthPx}px` : '100%' }}>
             {/* Dynamic Header based on active Zoom Level */}
             <div className="timeline-header">
               <div className="timeline-header-top">
@@ -472,9 +638,9 @@ export default function PlanView() {
                 </marker>
               </defs>
               {dependencyLines.map((line) => {
-                const pathD = `M ${line.startX}% ${line.startY}px C ${line.startX + 2}% ${line.startY}px, ${
-                  line.endX - 2
-                }% ${line.endY}px, ${line.endX}% ${line.endY}px`;
+                const pathD = `M ${line.startX} ${line.startY} C ${line.startX + 24} ${line.startY}, ${
+                  line.endX - 24
+                } ${line.endY}, ${line.endX} ${line.endY}`;
                 return (
                   <path
                     key={line.id}
@@ -603,6 +769,18 @@ export default function PlanView() {
         onClose={() => setModalOpen(false)}
         initialItem={editingItem}
         defaultPhaseId={selectedPhaseId}
+      />
+
+      <PhaseModal
+        isOpen={phaseModalOpen}
+        onClose={() => setPhaseModalOpen(false)}
+        initialPhase={editingPhase}
+        defaultProjectId={defaultProjectId}
+      />
+
+      <DependencyModal
+        isOpen={depModalOpen}
+        onClose={() => setDepModalOpen(false)}
       />
     </div>
   );

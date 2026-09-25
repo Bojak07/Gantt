@@ -1,5 +1,94 @@
 :root {
-  /* Core Dark Theme (Default Executive Slate) */
+  /* Core Light Theme (Default — Monday.com-inspired: crisp whites, slate borders, vibrant chips) */
+  --bg-primary: #f7f8f9;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f2f4f5;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f2f4f5;
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-overlay: rgba(15, 23, 42, 0.5);
+
+  --border-color: #e2e8f0;
+  --border-color-light: #cbd5e1;
+  --border-subtle: rgba(0, 0, 0, 0.06);
+
+  /* Typography */
+  --text-primary: #191b24;
+  --text-secondary: #4b5563;
+  --text-muted: #8a919e;
+  --text-inverse: #ffffff;
+
+  /* Brand Accents */
+  --primary: #0073e5;
+  --primary-hover: #005fc2;
+  --primary-light: rgba(0, 115, 229, 0.12);
+  --primary-glow: rgba(0, 115, 229, 0.3);
+  --brand-accent: #005fc2;
+  --brand-title-gradient: linear-gradient(90deg, #005fc2 0%, #7c3aed 100%);
+
+  /* Banner */
+  --banner-bg: linear-gradient(135deg, #ffffff 0%, #f2f4f5 100%);
+  --banner-border: #e2e8f0;
+
+  /* Status Colors */
+  --status-on-track: #00875a;
+  --status-on-track-bg: rgba(0, 135, 90, 0.12);
+  --status-at-risk: #d97706;
+  --status-at-risk-bg: rgba(242, 153, 74, 0.16);
+  --status-delayed: #e0344a;
+  --status-delayed-bg: rgba(224, 52, 74, 0.12);
+  --status-completed: #0b5ccc;
+  --status-completed-bg: rgba(11, 92, 204, 0.12);
+  --status-not-started: #6d7486;
+  --status-not-started-bg: rgba(109, 116, 134, 0.14);
+
+  /* Utilization Colors (R/G/Y) */
+  --util-overbooked: #e11d48;
+  --util-overbooked-bg: rgba(225, 29, 72, 0.12);
+  --util-high: #d97706;
+  --util-high-bg: rgba(217, 119, 6, 0.14);
+  --util-optimal: #10b981;
+  --util-optimal-bg: rgba(16, 185, 129, 0.12);
+  /* Legacy 4-state badge (main.css .badge-underbooked — unused by components, kept for safety) */
+  --util-underbooked: #0284c7;
+  --util-underbooked-bg: rgba(2, 132, 199, 0.12);
+
+  /* Resource Hierarchy Levels */
+  --color-domain: #7c3aed;
+  --color-domain-bg: rgba(124, 58, 237, 0.12);
+  --color-tribe: #0e7490;
+  --color-tribe-bg: rgba(14, 116, 144, 0.12);
+  --color-team: #0073e5;
+  --color-team-bg: rgba(0, 115, 229, 0.12);
+  --color-person: #db2777;
+  --color-person-bg: rgba(219, 39, 119, 0.12);
+
+  /* Planning Hierarchy Levels */
+  --color-project: #0073e5;
+  --color-phase: #7c3aed;
+  --color-workitem: #0ea5e9;
+  --color-milestone: #f59e0b;
+
+  /* Dimensions & Spacing */
+  --header-height: 64px;
+  --row-height: 46px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 9999px;
+
+  /* Typography */
+  --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Shadows (light) */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] {
+  /* Dark Theme (Executive Slate — original palette, ported from the pre-realignment :root) */
   --bg-primary: #0b0f19;
   --bg-secondary: #111827;
   --bg-tertiary: #1e293b;
@@ -23,6 +112,8 @@
   --primary-hover: #2563eb;
   --primary-light: rgba(59, 130, 246, 0.15);
   --primary-glow: rgba(59, 130, 246, 0.35);
+  --brand-accent: #60a5fa;
+  --brand-title-gradient: linear-gradient(90deg, #60a5fa 0%, #c084fc 100%);
 
   /* Banner */
   --banner-bg: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
@@ -40,11 +131,14 @@
   --status-not-started: #94a3b8;
   --status-not-started-bg: rgba(148, 163, 184, 0.15);
 
-  /* Utilization Colors */
+  /* Utilization Colors (R/G/Y) */
   --util-overbooked: #f43f5e;
   --util-overbooked-bg: rgba(244, 63, 94, 0.18);
+  --util-high: #f59e0b;
+  --util-high-bg: rgba(245, 158, 11, 0.15);
   --util-optimal: #10b981;
   --util-optimal-bg: rgba(16, 185, 129, 0.18);
+  /* Legacy 4-state badge */
   --util-underbooked: #38bdf8;
   --util-underbooked-bg: rgba(56, 189, 248, 0.15);
 
@@ -76,46 +170,9 @@
   --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Shadows */
+  /* Shadows (dark) */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.35), 0 2px 4px -1px rgba(0, 0, 0, 0.25);
   --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
   --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.25);
-}
-
-[data-theme="light"] {
-  --bg-primary: #f8fafc;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #f1f5f9;
-  --bg-surface: #ffffff;
-  --bg-surface-hover: #f1f5f9;
-  --bg-card: rgba(255, 255, 255, 0.95);
-  --bg-overlay: rgba(15, 23, 42, 0.6);
-
-  --border-color: #e2e8f0;
-  --border-color-light: #cbd5e1;
-  --border-subtle: rgba(0, 0, 0, 0.06);
-
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #64748b;
-  --text-inverse: #ffffff;
-
-  --banner-bg: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
-  --banner-border: #cbd5e1;
-
-  --status-on-track: #059669;
-  --status-on-track-bg: rgba(16, 185, 129, 0.12);
-  --status-at-risk: #d97706;
-  --status-at-risk-bg: rgba(245, 158, 11, 0.12);
-  --status-delayed: #dc2626;
-  --status-delayed-bg: rgba(239, 68, 68, 0.12);
-  --status-completed: #4f46e5;
-  --status-completed-bg: rgba(79, 70, 229, 0.12);
-  --status-not-started: #64748b;
-  --status-not-started-bg: rgba(100, 116, 139, 0.12);
-
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.12);
 }

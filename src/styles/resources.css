@@ -11,6 +11,47 @@
   background-color: var(--bg-primary);
 }
 
+/* Page Header with direct Add actions */
+.resource-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.resource-page-title {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: var(--text-primary);
+}
+
+.resource-page-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.resource-add-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-add {
+  background: var(--bg-secondary);
+  color: var(--primary);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-add:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
 /* Resource KPI Grid */
 .resource-kpi-grid {
   display: grid;
@@ -41,9 +82,10 @@
   background: var(--primary);
 }
 
+/* R/G/Y utilization accent (exact rules: >100% overbooked, 90–100% high, <90% optimal) */
 .kpi-card.overbooked::after { background: var(--util-overbooked); }
+.kpi-card.high::after { background: var(--util-high); }
 .kpi-card.optimal::after { background: var(--util-optimal); }
-.kpi-card.underbooked::after { background: var(--util-underbooked); }
 
 .kpi-header {
   display: flex;
@@ -140,6 +182,71 @@
   box-shadow: 0 1px 4px var(--primary-glow);
 }
 
+/* R/G/Y Utilization Legend */
+.util-legend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.util-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.util-legend-item span:first-child {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+/* Day-based Working Days & Capacity Context Strip */
+.working-days-strip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-surface);
+}
+
+.working-days-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-right: 6px;
+}
+
+.working-days-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.working-days-chip strong {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
 /* Monthly Matrix Table with Spacious Layout & Sticky Header/Column */
 .matrix-container {
   background: var(--bg-secondary);
@@ -217,7 +324,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  min-width: 280px;
+  min-width: 300px;
 }
 
 .person-name-box {
@@ -235,6 +342,60 @@
 .person-role-text {
   font-size: 11px;
   color: var(--text-muted);
+}
+
+/* Default weekly hours chip on person rows */
+.weekly-hours-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--color-team);
+  background: var(--color-team-bg);
+  border: 1px solid rgba(0, 115, 229, 0.3);
+  white-space: nowrap;
+}
+
+/* Row-level Edit/Delete actions (visible on hover) */
+.row-actions {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.matrix-table tr:hover .row-actions {
+  opacity: 1;
+}
+
+.row-action-btn {
+  padding: 5px 7px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.row-action-btn:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.row-action-btn.danger:hover {
+  color: var(--util-overbooked);
+  border-color: var(--util-overbooked);
+  background: var(--util-overbooked-bg);
 }
 
 .util-cell {
@@ -259,10 +420,17 @@
   transform: scale(1.08);
 }
 
+/* R/G/Y utilization classes (exact rules: >100% overbooked, 90–100% high, <90% optimal) */
 .util-badge-box.overbooked {
   background: var(--util-overbooked-bg);
   color: var(--util-overbooked);
-  border: 1px solid rgba(244, 63, 94, 0.4);
+  border: 1px solid rgba(225, 29, 72, 0.4);
+}
+
+.util-badge-box.high {
+  background: var(--util-high-bg);
+  color: var(--util-high);
+  border: 1px solid rgba(217, 119, 6, 0.4);
 }
 
 .util-badge-box.optimal {
@@ -271,17 +439,42 @@
   border: 1px solid rgba(16, 185, 129, 0.4);
 }
 
-.util-badge-box.underbooked {
-  background: var(--util-underbooked-bg);
-  color: var(--util-underbooked);
-  border: 1px solid rgba(56, 189, 248, 0.3);
-}
-
 .util-hours-sub {
   font-size: 10px;
   opacity: 0.9;
   font-weight: 600;
   margin-top: 1px;
+}
+
+/* Compact R/G/Y utilization chip (chart view) */
+.util-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.util-chip.overbooked {
+  background: var(--util-overbooked-bg);
+  color: var(--util-overbooked);
+  border: 1px solid var(--util-overbooked);
+}
+
+.util-chip.high {
+  background: var(--util-high-bg);
+  color: var(--util-high);
+  border: 1px solid var(--util-high);
+}
+
+.util-chip.optimal {
+  background: var(--util-optimal-bg);
+  color: var(--util-optimal);
+  border: 1px solid var(--util-optimal);
 }
 
 /* Expanded Task Details Sub-Drawer */
@@ -302,12 +495,59 @@
   font-size: 12px;
 }
 
+/* Drawer section with per-person day-based capacity formula */
+.drawer-section {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.drawer-section-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.drawer-section .working-days-strip {
+  padding: 0;
+  border-bottom: none;
+  background: transparent;
+}
+
 /* Monthly Chart Bars */
 .chart-container {
   padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chart-legend-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  display: inline-block;
 }
 
 .chart-bar-row {
@@ -317,10 +557,20 @@
 }
 
 .chart-month-label {
-  width: 90px;
+  width: 110px;
   font-size: 13px;
   font-weight: 700;
   color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chart-month-sub {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
 }
 
 .chart-bars-wrapper {
@@ -336,10 +586,52 @@
   transition: width 0.3s ease;
 }
 
+/* Demand bars colored by R/G/Y utilization */
 .chart-bar-demand {
-  background: linear-gradient(90deg, #38bdf8, #3b82f6);
+  background: var(--util-optimal);
+}
+
+.chart-bar-demand.high {
+  background: var(--util-high);
+}
+
+.chart-bar-demand.overbooked {
+  background: var(--util-overbooked);
 }
 
 .chart-bar-capacity {
   background: rgba(148, 163, 184, 0.3);
+}
+
+/* Day-based capacity formula box (capacity modal) */
+.capacity-formula-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--primary-light);
+  border: 1px solid rgba(0, 115, 229, 0.25);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.capacity-formula-box i {
+  color: var(--primary);
+}
+
+.capacity-formula-box strong {
+  color: var(--text-primary);
+}
+
+/* Form hint text */
+.form-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Compact confirmation modal */
+.modal-card-sm {
+  max-width: 420px;
 }

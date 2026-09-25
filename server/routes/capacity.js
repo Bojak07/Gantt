@@ -1,8 +1,7 @@
 import { Router } from 'express';
 import { getDatabase } from '../db/database.js';
 import { logChange } from '../services/audit.js';
-import { calculateMonthlyDemandForAssignment } from '../services/calculations.js';
-import { calculateMonthlyDemandForAssignment, getDynamicMonthlyCapacity } from '../services/calculations.js';
+import { calculateMonthlyDemandForAssignment, getDynamicMonthlyCapacity, getWorkingDaysInMonth } from '../services/calculations.js';
 
 const router = Router();
 
@@ -77,15 +76,17 @@ router.get('/matrix', (req, res) => {
         monthDemand = Math.round(monthDemand * 10) / 10;
         const utilizationPct = capacity > 0 ? Math.round((monthDemand / capacity) * 100) : 0;
         
+        // R/G/Y utilization rules: >100% overbooked, 90-100% high, <90% optimal
         let status = 'OPTIMAL';
         if (utilizationPct > 100) status = 'OVERBOOKED';
-        else if (utilizationPct < 70) status = 'UNDERBOOKED';
+        else if (utilizationPct >= 90) status = 'HIGH';
 
         monthlyData[month] = {
           capacityHours: capacity,
           demandHours: monthDemand,
           utilizationPct,
           status,
+          workingDays: getWorkingDaysInMonth(yy, mm),
           tasks: matchingTasks
         };
 
@@ -136,7 +137,8 @@ router.get('/matrix', (req, res) => {
           monthlyData: {}
         };
         MONTHS.forEach((m) => {
-          teamAggregates[teamKey].monthlyData[m] = { capacity: 0, demand: 0, utilizationPct: 0 };
+          const [yy, mm] = m.split('-').map(Number);
+          teamAggregates[teamKey].monthlyData[m] = { capacity: 0, demand: 0, utilizationPct: 0, workingDays: getWorkingDaysInMonth(yy, mm) };
         });
       }
 
@@ -149,7 +151,8 @@ router.get('/matrix', (req, res) => {
           monthlyData: {}
         };
         MONTHS.forEach((m) => {
-          tribeAggregates[tribeKey].monthlyData[m] = { capacity: 0, demand: 0, utilizationPct: 0 };
+          const [yy, mm] = m.split('-').map(Number);
+          tribeAggregates[tribeKey].monthlyData[m] = { capacity: 0, demand: 0, utilizationPct: 0, workingDays: getWorkingDaysInMonth(yy, mm) };
         });
       }
 
@@ -161,7 +164,8 @@ router.get('/matrix', (req, res) => {
           monthlyData: {}
         };
         MONTHS.forEach((m) => {
-          domainAggregates[domainKey].monthlyData[m] = { capacity: 0, demand: 0, utilizationPct: 0 };
+          const [yy, mm] = m.split('-').map(Number);
+          domainAggregates[domainKey].monthlyData[m] = { capacity: 0, demand: 0, utilizationPct: 0, workingDays: getWorkingDaysInMonth(yy, mm) };
         });
       }
 
@@ -191,7 +195,7 @@ router.get('/matrix', (req, res) => {
           node.monthlyData[m].utilizationPct = cap > 0 ? Math.round((dem / cap) * 100) : 0;
           let status = 'OPTIMAL';
           if (node.monthlyData[m].utilizationPct > 100) status = 'OVERBOOKED';
-          else if (node.monthlyData[m].utilizationPct < 70) status = 'UNDERBOOKED';
+          else if (node.monthlyData[m].utilizationPct >= 90) status = 'HIGH';
           node.monthlyData[m].status = status;
         });
       });

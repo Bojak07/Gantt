@@ -76,6 +76,12 @@ export const api = {
   // History
   getHistory: () => fetchJson('/history'),
 
+  // Business Decision Log
+  getDecisions: () => fetchJson('/decisions'),
+  createDecision: (data) => fetchJson('/decisions', { method: 'POST', body: JSON.stringify(data) }),
+  updateDecision: (id, data) => fetchJson(`/decisions/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteDecision: (id) => fetchJson(`/decisions/${id}`, { method: 'DELETE' }),
+
   // Demo Reset
   resetDemoData: () => fetchJson('/demo/reset', { method: 'POST' })
 };

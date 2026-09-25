@@ -5,6 +5,8 @@ import { calculateRollups } from '../services/calculations.js';
 
 const router = Router();
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 // GET all projects with nested phases, work items, assignments, dependencies, and rollups
 router.get('/', (req, res) => {
   try {
@@ -122,7 +124,7 @@ router.post('/projects', (req, res) => {
     `).run(
       id, name, code.toUpperCase(), description || '',
       status || 'ON_TRACK', health || 'HEALTHY',
-      start_date || '2025-01-01', end_date || '2025-12-31',
+      start_date || `${CURRENT_YEAR}-01-01`, end_date || `${CURRENT_YEAR}-12-31`,
       owner_id || null, budget || 0
     );
 
@@ -131,7 +133,7 @@ router.post('/projects', (req, res) => {
     db.prepare(`
       INSERT INTO phases (id, project_id, name, sort_order, start_date, end_date, status, progress)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(phaseId, id, 'Phase 1: Inception & Architecture', 1, start_date || '2025-01-01', end_date || '2025-06-30', 'ON_TRACK', 0);
+    `).run(phaseId, id, 'Phase 1: Inception & Architecture', 1, start_date || `${CURRENT_YEAR}-01-01`, end_date || `${CURRENT_YEAR}-06-30`, 'ON_TRACK', 0);
 
     logChange(db, 'PROJECT', id, 'CREATE', `Created project: ${name} (${code})`);
     const created = db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
@@ -195,7 +197,7 @@ router.post('/phases', (req, res) => {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       id, project_id, name, sort_order || 1,
-      start_date || '2025-01-01', end_date || '2025-06-30',
+      start_date || `${CURRENT_YEAR}-01-01`, end_date || `${CURRENT_YEAR}-06-30`,
       status || 'NOT_STARTED', progress || 0
     );
     logChange(db, 'PHASE', id, 'CREATE', `Created phase: ${name}`);

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext.jsx';
 import { formatCurrency, formatPercent } from '../../utils/formatters.js';
-import { MONTH_NAMES, QUARTERS, calculateBarCoordinates, formatShortDate } from '../../utils/dateUtils.js';
+import { MONTH_NAMES, QUARTERS, calculateBarCoordinates, formatShortDate, CURRENT_YEAR } from '../../utils/dateUtils.js';
 
 export default function PresentationView() {
   const { projectsData, hierarchyData } = useApp();
@@ -32,7 +32,7 @@ export default function PresentationView() {
       <div className="presentation-banner" style={{ background: 'var(--banner-bg)', border: '1px solid var(--banner-border)', padding: '28px 32px' }}>
         <div>
           <span className="badge badge-domain" style={{ marginBottom: '8px' }}>Executive Board Roadmap</span>
-          <h2 className="presentation-banner-title" style={{ fontSize: '26px' }}>Strategic Banking Technology Portfolio 2025</h2>
+          <h2 className="presentation-banner-title" style={{ fontSize: '26px' }}>Strategic Banking Technology Portfolio {CURRENT_YEAR}</h2>
           <p className="presentation-banner-sub" style={{ fontSize: '14px', marginTop: '6px' }}>
             Global Digital Channels • Real-Time Payments • Zero Trust Identity • Cloud Infrastructure
           </p>
@@ -81,7 +81,7 @@ export default function PresentationView() {
             </h3>
           </div>
           <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-            Showing {projectsData.projects.length} Strategic Initiatives across FY2025 (Jan – Dec)
+            Showing {projectsData.projects.length} Strategic Initiatives across FY{CURRENT_YEAR} (Jan – Dec)
           </span>
         </div>
 

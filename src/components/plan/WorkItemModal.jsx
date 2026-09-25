@@ -2,13 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api.js';
 import { useApp } from '../../context/AppContext.jsx';
 
+// Dynamic defaults anchored to the current date (no hardcoded years)
+const nextMonthStart = () => {
+  const n = new Date();
+  const y = n.getFullYear() + (n.getMonth() === 11 ? 1 : 0);
+  const m = n.getMonth() === 11 ? 1 : n.getMonth() + 1;
+  return `${y}-${String(m).padStart(2, '0')}-01`;
+};
+
+const lastDayOf = (dateStr) => {
+  const [y, m] = String(dateStr).split('-').map(Number);
+  const last = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  return `${y}-${String(m).padStart(2, '0')}-${String(last).padStart(2, '0')}`;
+};
+
 export default function WorkItemModal({ isOpen, onClose, initialItem = null, defaultPhaseId = null }) {
   const { projectsData, hierarchyData, refreshAll, addToast } = useApp();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [phaseId, setPhaseId] = useState(defaultPhaseId || '');
-  const [startDate, setStartDate] = useState('2025-03-01');
-  const [endDate, setEndDate] = useState('2025-04-30');
+  const [startDate, setStartDate] = useState(nextMonthStart());
+  const [endDate, setEndDate] = useState(lastDayOf(nextMonthStart()));
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState('NOT_STARTED');
   const [isMilestone, setIsMilestone] = useState(false);
@@ -22,8 +36,8 @@ export default function WorkItemModal({ isOpen, onClose, initialItem = null, def
       setName(initialItem.name || '');
       setDescription(initialItem.description || '');
       setPhaseId(initialItem.phase_id || defaultPhaseId || '');
-      setStartDate(initialItem.start_date || '2025-03-01');
-      setEndDate(initialItem.end_date || '2025-04-30');
+      setStartDate(initialItem.start_date || nextMonthStart());
+      setEndDate(initialItem.end_date || lastDayOf(initialItem.start_date || nextMonthStart()));
       setProgress(initialItem.progress || 0);
       setStatus(initialItem.status || 'NOT_STARTED');
       setIsMilestone(Boolean(initialItem.is_milestone));
@@ -40,8 +54,8 @@ export default function WorkItemModal({ isOpen, onClose, initialItem = null, def
       setName('');
       setDescription('');
       setPhaseId(defaultPhaseId || projectsData.flatPhases[0]?.id || '');
-      setStartDate('2025-03-01');
-      setEndDate('2025-04-30');
+      setStartDate(nextMonthStart());
+      setEndDate(lastDayOf(nextMonthStart()));
       setProgress(0);
       setStatus('NOT_STARTED');
       setIsMilestone(false);
@@ -106,6 +120,18 @@ export default function WorkItemModal({ isOpen, onClose, initialItem = null, def
       addToast(err.message, 'error');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm(`Delete "${initialItem.name}"? This cannot be undone.`)) return;
+    try {
+      await api.deleteWorkItem(initialItem.id);
+      addToast('Work item deleted.', 'success');
+      await refreshAll();
+      onClose();
+    } catch (err) {
+      addToast(err.message, 'error');
     }
   };
 
@@ -279,6 +305,12 @@ export default function WorkItemModal({ isOpen, onClose, initialItem = null, def
           </div>
 
           <div className="modal-footer">
+            {initialItem?.id && (
+              <button type="button" className="btn btn-danger" onClick={handleDelete}>
+                <i className="fa-solid fa-trash-can"></i>
+                <span>Delete</span>
+              </button>
+            )}
             <button type="button" className="btn btn-secondary" onClick={onClose}>
               Cancel
             </button>
