@@ -1,0 +1,10 @@
+# Dependencies
+node_modules/
+
+# SQLite runtime artifacts (WAL mode) — recreated on every server run
+*.db-wal
+*.db-shm
+*.db-journal
+
+# Logs
+*.log
